@@ -1,13 +1,13 @@
-# ChatBot-AI
+# **ChatBot-AI using Dialogflow ES & React.js**
 
-Here are the **requirements** for a simple **predefined chatbot** using **Rasa Open Source** **without machine learning** (Rule-Based Chatbot). 🚀  
+Here are the **requirements** for a **predefined chatbot** using **Google Dialogflow ES** with a **custom chatbot UI in React.js**. 🚀  
 
 ---
 
-# **📌 Project Requirements: Rule-Based Chatbot using Rasa Open Source**
+# **📌 Project Requirements: Predefined Chatbot using Dialogflow ES & React.js**
 
 ## **1️⃣ Project Overview**
-Develop a **predefined (rule-based) chatbot** using **Rasa Open Source** that responds to user queries based on predefined intents and responses. The chatbot will not use machine learning but will rely on a rule-based approach.
+Develop a **predefined chatbot** using **Google Dialogflow ES** and integrate it into a **custom chatbot UI built with React.js**. The chatbot will respond to user queries based on predefined intents and responses.
 
 ---
 
@@ -18,172 +18,167 @@ Develop a **predefined (rule-based) chatbot** using **Rasa Open Source** that re
 - The chatbot should handle **goodbye messages** (e.g., "Bye", "See you later").
 - The chatbot should handle **fallback responses** when the user asks an unknown question.
 
-### ✅ **Predefined Intents**
+### ✅ **Predefined Intents in Dialogflow ES**
 The chatbot should recognize and respond to the following **predefined intents**:  
 1. **Greeting Intent** (`greet`) → Responds to "Hello", "Hi", etc.  
 2. **Goodbye Intent** (`goodbye`) → Responds to "Bye", "See you".  
 3. **FAQ Intent** (`faq`) → Responds to predefined FAQs.  
-4. **Fallback Intent** (`nlu_fallback`) → Handles unknown questions.  
+4. **Fallback Intent** (`fallback`) → Handles unknown questions.  
 
 ### ✅ **Predefined Responses**
 - Example responses:
   - **Greet** → "Hello! How can I help you today?"
   - **Goodbye** → "Goodbye! Have a nice day!"
-  - **FAQ Example** → "Rasa is an open-source chatbot framework."
+  - **FAQ Example** → "Dialogflow is a natural language understanding platform."
   - **Fallback** → "I'm sorry, I don't understand. Can you rephrase that?"
 
 ---
 
 ## **3️⃣ Technical Requirements**
 ### ✅ **Development Environment**
-- **Python 3.8+**
-- **Rasa Open Source**
-- **Command Line Interface (CLI)**
-- **Text-based chatbot** (running in `rasa shell`)
+- **Google Dialogflow ES** (Cloud-based chatbot platform)
+- **React.js** (Frontend UI framework)
+- **Node.js & Express (Optional for backend API)**
+- **Dialogflow API** (To communicate between React UI and Dialogflow)
+- **Firebase or Webhooks (Optional for dynamic responses)**
 
 ### ✅ **Installation & Setup**
-1. Install **Rasa Open Source**:
+1. **Create a Dialogflow Agent**
+   - Go to **Dialogflow Console** → Create a new agent.
+   - Define **intents, responses, and fallback messages**.
+   
+2. **Enable Dialogflow API**
+   - Go to **Google Cloud Console**.
+   - Enable the **Dialogflow API**.
+   - Generate a **service account key (JSON file)** for authentication.
+
+3. **Set up a React Project**
    ```bash
-   pip install rasa
+   npx create-react-app chatbot-ui
+   cd chatbot-ui
+   npm install axios react-chatbot-kit
    ```
-2. Initialize a **new Rasa project**:
+
+4. **Create an Express Backend (Optional, if needed for authentication)**
    ```bash
-   rasa init --no-prompt
+   mkdir backend && cd backend
+   npm init -y
+   npm install express cors axios dotenv
    ```
-3. Modify the necessary files to add **rule-based responses**.
 
 ---
 
 ## **4️⃣ Implementation Details**
-### ✅ **Key Rasa Files**
-1. **NLU Training Data (`data/nlu.yml`)**  
-   Defines the **intents** and sample user inputs.
-2. **Domain File (`domain.yml`)**  
-   Defines **intents, responses, and actions**.
-3. **Rules File (`data/rules.yml`)**  
-   Defines **rule-based responses** (no ML training required).
-4. **Configuration File (`config.yml`)**  
-   Ensures **no machine learning is used**.
-5. **Actions File (Optional, `actions.py`)**  
-   Can be used for custom responses (not required for simple bots).
+### ✅ **Key Dialogflow Files**
+1. **Intents & Responses** (Configured in Dialogflow ES console)
+2. **Dialogflow API Key** (Downloaded as a JSON file from Google Cloud Console)
+3. **Webhook Integration** (Optional for dynamic responses)
+
+### ✅ **React.js Chatbot UI Components**
+1. **Chat Interface** → Text input field + chat bubbles.
+2. **API Handler** → Fetches responses from Dialogflow.
+3. **State Management** → Manages chat history.
 
 ---
 
-## **5️⃣ Example File Configurations**
-### ✅ **`data/nlu.yml` (Define Intents)**
-```yaml
-nlu:
-- intent: greet
-  examples: |
-    - hi
-    - hello
-    - hey
-    - good morning
-    - good evening
+## **5️⃣ Example Code**
+### ✅ **React: Chatbot Component (`Chatbot.js`)**
+```jsx
+import React, { useState } from "react";
+import axios from "axios";
 
-- intent: goodbye
-  examples: |
-    - bye
-    - goodbye
-    - see you later
+const Chatbot = () => {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
 
-- intent: faq
-  examples: |
-    - what is rasa?
-    - how does rasa work?
-    - how can I install rasa?
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    const userMessage = { sender: "user", text: input };
+    setMessages([...messages, userMessage]);
 
-- intent: nlu_fallback
-  examples: |
-    - I want to order a pizza
-    - Tell me a joke
+    try {
+      const response = await axios.post("http://localhost:5000/chat", { message: input });
+      const botMessage = { sender: "bot", text: response.data.reply };
+      setMessages([...messages, userMessage, botMessage]);
+    } catch (error) {
+      console.error("Error fetching response:", error);
+    }
+    setInput("");
+  };
+
+  return (
+    <div className="chat-container">
+      <div className="chat-box">
+        {messages.map((msg, index) => (
+          <div key={index} className={msg.sender}>{msg.text}</div>
+        ))}
+      </div>
+      <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type a message..." />
+      <button onClick={sendMessage}>Send</button>
+    </div>
+  );
+};
+
+export default Chatbot;
 ```
 
 ---
 
-### ✅ **`domain.yml` (Define Responses)**
-```yaml
-intents:
-  - greet
-  - goodbye
-  - faq
-  - nlu_fallback
+### ✅ **Express Backend (`server.js`)**
+```js
+const express = require("express");
+const cors = require("cors");
+const axios = require("axios");
+require("dotenv").config();
 
-responses:
-  utter_greet:
-    - text: "Hello! How can I help you today?"
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-  utter_goodbye:
-    - text: "Goodbye! Have a nice day!"
+app.post("/chat", async (req, res) => {
+  const userMessage = req.body.message;
+  const dialogflowApiUrl = "https://api.dialogflow.cloud.google.com/v2/projects/YOUR_PROJECT_ID/agent/sessions/123456:detectIntent";
 
-  utter_faq:
-    - text: "Rasa is an open-source chatbot framework."
+  try {
+    const response = await axios.post(dialogflowApiUrl, {
+      queryInput: {
+        text: {
+          text: userMessage,
+          languageCode: "en"
+        }
+      }
+    }, {
+      headers: { Authorization: `Bearer YOUR_ACCESS_TOKEN` }
+    });
 
-  utter_default:
-    - text: "I'm sorry, I don't understand. Can you rephrase that?"
-```
+    res.json({ reply: response.data.queryResult.fulfillmentText });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ reply: "Error fetching response." });
+  }
+});
 
----
-
-### ✅ **`data/rules.yml` (Define Rule-Based Responses)**
-```yaml
-rules:
-- rule: Greet User
-  steps:
-  - intent: greet
-  - action: utter_greet
-
-- rule: Say Goodbye
-  steps:
-  - intent: goodbye
-  - action: utter_goodbye
-
-- rule: Answer FAQ
-  steps:
-  - intent: faq
-  - action: utter_faq
-
-- rule: Fallback Response
-  steps:
-  - intent: nlu_fallback
-  - action: utter_default
-```
-
----
-
-### ✅ **`config.yml` (Disable Machine Learning)**
-```yaml
-recipe: default.v1
-language: en
-pipeline: []  # No machine learning pipeline
-policies:
-  - name: RulePolicy
+app.listen(5000, () => console.log("Server running on port 5000"));
 ```
 
 ---
 
 ## **6️⃣ Running the Chatbot**
-1. **Train the chatbot** (Only needed for validation):  
+1. **Start the Backend Server**:  
    ```bash
-   rasa train
+   node server.js
    ```
-2. **Run the chatbot in shell mode**:  
+2. **Run the React Frontend**:  
    ```bash
-   rasa shell
+   npm start
    ```
-3. **Test it by typing messages like**:  
-   - "Hi"
-   - "What is Rasa?"
-   - "Goodbye"
-   - "Tell me a joke" (fallback response)
+3. **Test the chatbot UI** in the browser!
 
 ---
 
 ## **7️⃣ Deployment (Optional)**
-- Deploy on **Docker, AWS, Google Cloud, or Heroku**.
-- Integrate with **WhatsApp, Telegram, or Slack** via Rasa connectors.
+- **Deploy on Firebase, AWS, or Heroku**
+- **Embed chatbot UI in an existing website**
+- **Integrate with WhatsApp, Facebook Messenger, or Telegram**
 
 ---
-
-## **8️⃣ Conclusion**
-This chatbot is a **simple predefined chatbot using Rasa Open Source** with **no machine learning**. It works using **rules-based responses** for predefined intents.
