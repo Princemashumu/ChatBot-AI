@@ -1,6 +1,4 @@
-For a polished and visually engaging `README.md`, you can include icons to make sections stand out. Below is your `README.md` with relevant icons using Markdown formatting. You can use icons from services like [FontAwesome](https://fontawesome.com/icons) or [Simple Icons](https://simpleicons.org/) for easy integration. I’ve added some example icons below:
 
-```markdown
 # 🤖 Dialogflow Chatbot Server
 
 This project is a simple Express.js server that integrates with Google Dialogflow for processing chatbot messages. The server handles incoming requests, sends them to Dialogflow for intent detection, and responds with the chatbot's reply.
